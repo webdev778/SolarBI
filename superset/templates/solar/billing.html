@@ -1,0 +1,82 @@
+{% extends 'solar/basic.html' %}
+
+{% block solar_content %}
+    <div class="s-layout__content">
+        <div class="billing-content">
+            <ul class="nav nav-pills">
+                <li class="active">
+                    <a href="#billing" data-toggle="tab"><i class="fas fa-credit-card"></i>Billing</a>
+                </li>
+                <li><a href="#plan" data-toggle="tab"><i class="far fa-list-alt"></i>Plan</a></li>
+            </ul>
+            <div style="display: flex; align-items: center; justify-content: center; height: 100%;">
+                <div class="tab-content clearfix">
+                    <div class="tab-pane active" id="billing">
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">Billing Details</div>
+                            <div class="panel-body">
+                                <p>Please let us know how you’d like your invoices to be addressed.</p>
+                                <form method="post" action="">
+                                    <div class="form-group">
+                                        <label for="name">Name</label>
+                                        <input id="name" class="form-control">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="email">Billing email</label>
+                                        <input type="email" id="email" class="form-control">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="address">Address</label>
+                                        <textarea id="address" class="form-control"></textarea>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="panel-footer">
+                                <button class="btn btn-success">Update details</button>
+                            </div>
+                        </div>
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">Users</div>
+                            <div class="panel-body">
+                                 <table style="width: 100%;">
+                                     <thead>
+                                        <tr>
+                                            <th>INVOICE #</th>
+                                            <th>DATE</th>
+                                            <th></th>
+                                        </tr>
+                                     </thead>
+                                     <tbody>
+                                        <tr>
+                                            <td>19290839</td>
+                                            <td>24/03/2019</td>
+                                            <td><i class="fas fa-cloud-download-alt"></i></td>
+                                        </tr>
+                                     </tbody>
+                                 </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="plan">
+                        <h1>Add a plan</h1>
+                        <div class="plan-option-pane">
+                            <div class="option-name"><i class="fas fa-list-ul"></i><span>On Demand</span></div>
+                            <div class="option-description">On demand you will be charge every new downloadable data set</div>
+                            <div class=" option-submit"><button class="btn btn-default">Current</button></div>
+                        </div>
+                        <div class="plan-option-pane">
+                            <div class="option-name"><i class="fas fa-hotel"></i><span>Subscription</span></div>
+                            <div class="option-description">$100 Increases for upto 3 new download data sets</div>
+                            <div class=" option-submit"><button class="btn btn-default">Choose</button></div>
+                        </div>
+                        <div class="plan-option-pane">
+                            <div class="option-name"><i class="fas fa-project-diagram"></i><span>Unlimited</span></div>
+                            <div class="option-description">$1000 month flat fee for all the downloads you can do !</div>
+                            <div class=" option-submit"><button class="btn btn-default">Choose</button></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

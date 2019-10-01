@@ -1,0 +1,201 @@
+{#
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.
+#}
+{% extends "solar/basic.html" %}
+{% import 'appbuilder/general/lib.html' as lib %}
+
+{% set languages = appbuilder.languages %}
+{% set WARNING_MSG = appbuilder.app.config.get('WARNING_MSG') %}
+{% set app_icon_width = appbuilder.app.config.get('APP_ICON_WIDTH', 126) %}
+
+{% block solar_content %}
+    <div class="s-layout__content">
+        <div class="list-alert-top">
+            {% block messages %}
+              {% include 'superset/flash_wrapper.html' %}
+            {% endblock %}
+        </div>
+        <div>
+            {% block team_info %}
+                <div class="team-card">
+                    <h3>Team Settings</h3>
+                    <hr>
+                    <div class="team-name">
+                        <label for="team_name_input">Team Name</label>
+                        <input id="team_name_input" name="team_name" type="text" value="{{ team_name }}" style="background-color: #FCFAFA; width: 90%; border: 1px solid #CCCCCC; height: 50px; font-size: 18px;">
+{#                        <button class="edit-team-info">edit</button>#}
+                    </div>
+                    <hr>
+                    <button id="update_team" class="invite-btn">Update Team</button>
+                </div>
+            {% endblock %}
+
+            {% block users %}
+                <div class="team-card">
+                    <h3>Users</h3>
+                    <hr>
+                    <div class="users">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for email, role in team_members %}
+                                    <tr>
+                                        <td>{{ email }}</td>
+                                        <td>{{ role }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% endblock %}
+
+            {% block invites %}
+                <div class="team-card">
+                    <h3>Invites</h3>
+                    <hr>
+                    <div class="invites">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="min-width: 250px">Email</th>
+                                    <th style="min-width: 180px">Status</th>
+                                    <th style="min-width: 180px">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for email, valid in awaiting_emails %}
+                                    <tr>
+                                        <td>{{ email }}</td>
+                                        {% if valid %}
+                                            <td><p class="invite-status">Awaiting Response</p></td>
+                                        {% else %}
+                                            <td><p class="invite-status">Invitation Expired</p></td>
+                                        {% endif %}
+                                        <td>
+
+                                            <button class="resend-email">Resend</button>
+                                            <button class="delete-invitation">Remove</button>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {{ widgets.get('edit')(form_action=form_action)|safe }}
+                </div>
+            {% endblock %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block tail_js %}
+    <script src="https://kit.fontawesome.com/ace8403ae5.js"></script>
+    <script src="{{url_for('appbuilder.static',filename='js/bootstrap.min.js')}}"></script>
+    <script>
+        {#$(".edit-team-info").click(function() {#}
+        {#    $("input[name='team_name']")#}
+        {#        .prop('disabled', false)#}
+        {#        .css("background-color", "yellow")#}
+        {#        .focus();});#}
+
+        {#$("input[name='team_name']").change(function() {#}
+        {#    $("#update_team").prop('disabled', false);});#}
+
+        $('#update_team').click(function() {
+            let new_team_name = $('#team_name_input').val();
+            if (new_team_name === '' || new_team_name == null) {
+                return alert("Team name cannot be empty");
+            }
+            let csrf_token = "{{ csrf_token() if csrf_token else '' }}";
+            $.ajaxSetup({
+                beforeSend: function(xhr, settings) {
+                    if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrf_token);
+                    }
+                }
+            });
+            $.ajax({
+                type : "POST",
+                url : "{{ url_for('SolarBIRegisterInvitationUserDBView.update_team_name') }}",
+                data: JSON.stringify({new_team_name: new_team_name}),
+                contentType: 'application/json;charset=UTF-8',
+                success: function(data) {
+                    if (data.redirect) {
+                        window.location.replace(data.redirect)
+                    }
+                    {#console.log('success')#}
+                }
+            });
+        });
+
+        $('.resend-email').click(function() {
+            let selected_email = $(this).parent().prev().prev().html();
+            let csrf_token = "{{ csrf_token() if csrf_token else '' }}";
+            $(this).replaceWith("<img src=\"/static/assets/images/loading.gif\" style=\"width: 40px; margin-right: 17px; margin-left: 20px;\">");
+            $.ajaxSetup({
+                beforeSend: function(xhr, settings) {
+                    if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrf_token);
+                    }
+                }
+            });
+            $.ajax({
+                type : "POST",
+                url : "{{ url_for('SolarBIRegisterInvitationUserDBView.resend_email') }}",
+                data: JSON.stringify({selected_email: selected_email}),
+                contentType: 'application/json;charset=UTF-8',
+                success: function(data) {
+                    if (data.redirect) {
+                        window.location.replace(data.redirect)
+                    }
+                    {#console.log('success')#}
+                }
+            });
+        });
+
+        $('.delete-invitation').click(function() {
+            let selected_email = $(this).parent().prev().prev().html();
+            let csrf_token = "{{ csrf_token() if csrf_token else '' }}";
+            $.ajaxSetup({
+                beforeSend: function(xhr, settings) {
+                    if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrf_token);
+                    }
+                }
+            });
+            $.ajax({
+                type : "POST",
+                url : "{{ url_for('SolarBIRegisterInvitationUserDBView.delete_invitation') }}",
+                data: JSON.stringify({selected_email: selected_email}),
+                contentType: 'application/json;charset=UTF-8',
+                success: function(data) {
+                    if (data.redirect) {
+                        window.location.replace(data.redirect)
+                    }
+                    {#console.log('success')#}
+                }
+            });
+        });
+    </script>
+{% endblock %}

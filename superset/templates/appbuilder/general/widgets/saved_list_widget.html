@@ -1,0 +1,192 @@
+{#
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.
+#}
+{% extends 'appbuilder/general/widgets/saved_base_list.html' %}
+{% import 'appbuilder/general/lib.html' as lib %}
+
+<link href="{{url_for('static',filename='assets/stylesheets/solarbi.less')}}?v=1.0" rel="stylesheet">
+
+{% block begin_title %}
+    <div class="title-card">
+        <div class="card-container">
+            <p style="font-size: 20px; font-weight: 500; color: #0063B0; margin: 0">Explain more</p>
+            <p style="font-size: 15px; color: #0063B0;">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco la</p>
+        </div>
+        <a href="/solar/add" class="my-data-add">New</a>
+    </div>
+    <div class="my-data-search-container">
+        <i class="fas fa-search my-data-search-icon"></i>
+        <input id="searchInput" class="my-data-search" type="text" placeholder="Search Data Sets">
+    </div>
+{% endblock %}
+
+{% block begin_content scoped %}
+    <div class="list-cards-wrapper">
+{#    <div class="table-responsive">#}
+{#    <table class="table table-bordered table-hover">#}
+{% endblock %}
+
+{% block begin_loop_header scoped %}
+{#    <thead>#}
+{#    <tr>#}
+{#    {% if actions %}#}
+{#    <th class="action_checkboxes">#}
+{#        <input id="check_all" class="action_check_all" name="check_all" type="checkbox">#}
+{#    </th>#}
+{#    {% endif %}#}
+{##}
+{#    {% if can_show or can_edit or can_delete %}#}
+{#        <th class="col-md-1 col-lg-1 col-sm-1" ></th>#}
+{#    {% endif %}#}
+{##}
+{#    {% for item in include_columns %}#}
+{#        {% if item in order_columns %}#}
+{#            {% set res = item | get_link_order(modelview_name) %}#}
+{#                {% if res == 2 %}#}
+{#                <th><a href={{ item | link_order(modelview_name) }}>{{label_columns.get(item)}}#}
+{#                <i class="fa fa-chevron-up pull-right"></i></a></th>#}
+{#            {% elif res == 1 %}#}
+{#                <th><a href={{ item | link_order(modelview_name) }}>{{label_columns.get(item)}}#}
+{#                <i class="fa fa-chevron-down pull-right"></i></a></th>#}
+{#            {% else %}#}
+{#                <th><a href={{ item | link_order(modelview_name) }}>{{label_columns.get(item)}}#}
+{#                <i class="fa fa-arrows-v pull-right"></i></a></th>#}
+{#            {% endif %}#}
+{#        {% else %}#}
+{#            <th>{{label_columns.get(item)}}</th>#}
+{#        {% endif %}#}
+{#    {% endfor %}#}
+{#    </tr>#}
+{#    </thead>#}
+{% endblock %}
+
+{% block begin_loop_values %}
+    {% for item in value_columns %}
+        <div class="list-card">
+            {% set formatter = formatters_columns.get(value) %}
+            {% if 'None' in item['slice_query_id'] %}
+                <div class="list-container">
+                    {% if formatter %}
+                        {{ formatter(item['view_slice_name']) }}
+                    {% else %}
+                        {{ item['view_slice_name'] }}
+                    {% endif %}
+                    <hr style="border-bottom: 1px solid #C7C9CB; width: 80px; margin: -10px auto 20px;">
+                    <i class="fas fa-chart-pie my-data-pie"></i>
+                    {{ item['view_slice_link'] }}
+                </div>
+            {% else %}
+                <div class="download-container">
+                {% if formatter %}
+                    {{ formatter(item['view_slice_name']) }}
+                {% else %}
+                   {% set info = item['view_slice_name'].split('_') %}
+                   <div class="ribbon ribbon-top-right"><span>requested</span></div>
+                   <table>
+                      <tr>
+                        <td>Address</td>
+                        <td><div>{{ info[0][3:] }}</div></td>
+                      </tr>
+                      <tr>
+                        <td>Start Date</td>
+                        <td>{{ info[1] }}</td>
+                      </tr>
+                      <tr>
+                        <td>End Date</td>
+                        <td>{{ info[2] }}</td>
+                      </tr>
+                      <tr>
+                        <td>Type</td>
+                        <td>{{ info[3] }}</td>
+                      </tr>
+                      <tr>
+                        <td>Resolution</td>
+                        <td>{{ info[4][:-4] }}</td>
+                      </tr>
+                      <tr>
+                        <td>Status</td>
+                          {% if item['slice_query_id'] in obj_keys %}
+                             <td>
+                                 Completed<a class="download-link" href="{{ item['slice_download_link'] }}"><i class="fas fa-arrow-circle-down"></i></a>
+                             </td>
+                          {% else %}
+                              <td>Still running</td>
+                          {% endif %}
+                      </tr>
+                    </table>
+                {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    {% endfor %}
+
+{#    {% for item in value_columns %}#}
+{#        {% set pk = pks[loop.index-1] %}#}
+{#        <tr>#}
+{#            {% if actions %}#}
+{#            <td>#}
+{#                <input id="{{pk}}" class="action_check" name="rowid" value="{{pk}}" type="checkbox">#}
+{#            </td>#}
+{#            {% endif %}#}
+{#            {% if can_show or can_edit or can_delete %}#}
+{#                <td><center>#}
+{#                {{ lib.btn_crud(can_show, can_edit, can_delete, pk, modelview_name, filters) }}#}
+{#                </center></td>#}
+{#            {% endif %}#}
+{#            {% for value in include_columns %}#}
+{#                {% set formatter = formatters_columns.get(value) %}#}
+{#                {% if formatter %}#}
+{#                    <td>{{ formatter(item[value]) }}</td>#}
+{#                {% else %}#}
+{#                    <td>{{ item[value] }}</td>#}
+{#                {% endif %}#}
+{#            {% endfor %}#}
+{#        </tr>#}
+{#    {% endfor %}#}
+{% endblock %}
+
+{% block tail_js %}
+{#    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>#}
+    <script>
+        $(document).ready(function(){
+          $("#searchInput").on("keyup", function() {
+            var value = $(this).val().toLowerCase();
+            $(".list-card").filter(function() {
+              $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+          });
+
+          $(".list-card > div > p").each(function() {
+              var el= $(this);
+              var textLength = el.html().length;
+              if (textLength <= 17) {
+                  el.css('font-size', '1.5em');
+              } else if (textLength > 17 && textLength <= 25) {
+                  el.css('font-size', '1.3em');
+              } else if (textLength > 25) {
+                  el.css('font-size', '1.0em');
+              }
+          });
+        });
+    </script>
+{% endblock %}
+
+{% block end_content scoped %}
+{#    </table>#}
+    </div>
+{% endblock %}

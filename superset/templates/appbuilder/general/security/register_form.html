@@ -1,0 +1,142 @@
+{#
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.
+#}
+{% block register_form %}
+    {% if form_action is defined %}
+        <form action="{{form_action}}" method="post" enctype="multipart/form-data">
+    {% else %}
+        <form id="model_form" action="" method="post" enctype="multipart/form-data">
+    {% endif %}
+        {% if form.errors %}
+            <div class="alert-top">
+                {% for error in form.errors.items() %}
+                {# {% if loop.first %}#}
+                    <div class="alert alert-danger">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        {% if error[1][0] == 'Already exists.' %}
+                            {{ _('Username already exists.') }}
+                        {% else %}
+                            {{ error[1][0] }}
+                        {% endif %}
+
+                    </div>
+                {#  {% endif %}#}
+                {% endfor %}
+             </div>
+        {% endif %}
+        {{ form.hidden_tag() }}
+        <img class="signup-solarbi-sun" src="/static/assets/images/solarbi_auth_sun1.jpg" alt="solar sun">
+        <h4 class="solarbi-text">SOLARBI</h4>
+        <p class="solarbi-welcome">Please complete to create your account.</p>
+        <div class="content">
+            <div class="input-fields">
+                {% for field in form %}
+                    {% if field.name == 'first_name' or field.name == 'last_name' %}
+                        <div class="inline-names inline-{{ field.name[:-5] }}-name">
+                            {{ field(size = 80, class = 'input-line full-width extra-mb', placeholder=field.label.text) }}
+                        </div>
+                    {% elif field.name == 'password' %}
+                        <div data-toggle="tooltip" data-placement="top" title="Password must be at least 8 characters and it must contain at least one number and one letter." class="password-div">
+                            {{ field(size = 80, id=field.name, class = "input-line full-width", placeholder=field.label.text) }}
+                            <span id="pass_message" class="match-message"></span>
+                        </div>
+                    {% elif field.name == 'conf_password' %}
+                        <div class="conf-password-div">
+                            {{ field(size = 80, id=field.name, class = "input-line full-width", placeholder=field.label.text) }}
+                             <span id="conf_message" class="match-message"></span>
+                        </div>
+                    {% else %}
+                        {{ field(size = 80, id=field.name, class = "input-line full-width extra-mb", placeholder=field.label.text) }}
+                    {% endif %}
+                {% endfor %}
+                <div class="agreed">
+                    <input class="check" id="check_id" name="agreed" size="10" type="checkbox">
+                    <label for="check_id">
+                        <span class="icon"></span><span class="agree-terms">
+                            {{ _('I agree with terms and conditions') }}
+                        </span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <input id="submitButton" class="signup-page-btn" type="submit" value="{{_('Sign Up')}}">
+    </form>
+
+{% endblock %}
+
+{% block tail_js %}
+    <script>
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+        });
+
+        $('#password').bind('input', function() {
+            let passwordReady = false;
+            const regex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/igm;
+            let result = regex.test($(this).val());
+
+            if (!result) {
+                if ($(this).val().length == 0) {
+                    $('#pass_message').hide();
+                } else {
+                    passwordReady = false;
+                    $('#pass_message').show();
+                    $('#pass_message').html("×").css({"color": "red", "height": "20px"});
+                }
+            } else {
+                passwordReady = true;
+                $('#pass_message').show();
+                $('#pass_message').html("✓").css({"color": "green", "height": "20px"});
+            }
+
+            if ($('#password').val().length > 0 && passwordReady) {
+                $("#conf_message").show();
+                $('#password, #conf_password').on('keyup', function () {
+                    if ($('#password').val() == $('#conf_password').val()) {
+                        $('#conf_message').html("✓").css({"color": "green", "height": "20px"});
+                    } else {
+                        $('#conf_message').html("×").css({
+                            "color": "red",
+                            "height": "20px"
+                        });
+                    }
+                });
+            } else {
+                $("#conf_message").hide();
+            }
+        });
+
+        $("form").submit(function () {
+            if (!$('#check_id').is(':checked')) {
+               alert("To proceed you must agree the terms");
+               return false;
+            }
+
+            if ($('#pass_message').text() !== "✓") {
+               alert("To proceed you must provide a valid password");
+               return false;}
+            if ($('#conf_message').text() !== "✓") {
+               alert("To proceed passwords must match");
+               return false;}
+            return true;
+        });
+
+
+
+    </script>
+{% endblock %}

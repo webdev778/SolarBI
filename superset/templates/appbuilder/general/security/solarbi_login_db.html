@@ -1,0 +1,63 @@
+{#
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.
+#}
+<!-- extend base layout -->
+{% extends "solar/base.html" %}
+
+{% block right %}
+    <div class="right">
+        <div class="alert-top">
+            {% block messages %}
+              {% include 'superset/flash_wrapper.html' %}
+            {% endblock %}
+        </div>
+        <img class="solarbi-sun" src="/static/assets/images/solarbi_auth_sun1.jpg" alt="solar sun">
+        <form class="form" action="" method="post" name="login">
+            {{form.hidden_tag()}}
+            <h4 class="solarbi-text">SOLARBI</h4>
+            <p class="solarbi-welcome">Welcome back! Please login to your account.</p>
+            <div class='content'>
+                <div class='input-fields'>
+                    {{ form.username(size = 80, class = "input-line full-width", placeholder = "Username/Email") }}
+                    {{ form.password(size = 80, class = "input-line full-width", placeholder = "Password") }}
+                </div>
+                <div class="login-options">
+                    <div class="remember-me">
+                        {{ form.remember_me(size = 10, id = "check_id", class = "check") }}
+                        <label for="check_id">
+                            <span class="icon"></span><span class="rm">Remember me</span>
+                        </label>
+                    </div>
+                    <a class="forgot" href="{{appbuilder.sm.get_url_for_recover}}">{{ _("Forgot Password") }}</a>
+                </div>
+                <div class="form-buttons">
+                    <input class="login-btn" type="submit" value="{{_('Login')}}">
+                    {% if appbuilder.sm.auth_user_registration %}
+                        <a href="{{appbuilder.sm.get_url_for_registeruser}}" class="signup-btn" data-toggle="tooltip" rel="tooltip"
+                        title="{{_('If you are not already a user, please sign up')}}">
+                            {{_('Sign up')}}
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+        </form>
+        <p class="fixed-term-of-use term-of-use">Term of use. Privacy policy</p>
+    </div>
+{% endblock %}
+
